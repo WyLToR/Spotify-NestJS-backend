@@ -1,21 +1,31 @@
-import { Controller, Post, Body, Get, Param, HttpStatus, ParseIntPipe, Patch, Delete } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, Patch, Delete, UseGuards } from '@nestjs/common';
 import { SongService } from './song.service';
 import { SongDto } from './dto';
-import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { JwtGuard } from 'src/auth/guard';
+import { PlaylistService } from 'src/playlist/playlist.service';
 
 @ApiTags('song')
 @Controller('song')
 export class SongController {
-    constructor(private readonly songService: SongService) { }
+    constructor(
+        private readonly songService: SongService,
+        private readonly playListService: PlaylistService
+    ) { }
 
-    @Post('/')
+    @Post('/:albumId')
+    @UseGuards(JwtGuard)
+    @ApiBearerAuth()
     @ApiOperation({ summary: 'Create New Song' })
     @ApiResponse({ status: 201, description: 'The song has been successfully created' })
     @ApiResponse({ status: 400, description: 'Request body format is incorrect' })
     @ApiBody({ type: SongDto })
-    async createSong(@Body() dto: SongDto) {
+    async createSong(
+        @Param('albumId') albumId: string,
+        @Body() dto: SongDto
+    ) {
         try {
-            return this.songService.createSong(dto);
+            return this.songService.createSong(albumId, dto);
         } catch (error) {
             return { error: error.message }
         }
@@ -33,13 +43,46 @@ export class SongController {
         }
     }
 
+    @Post('/:playListId/:songId')
+    @UseGuards(JwtGuard)
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Add Song to Playlist' })
+    @ApiResponse({ status: 201, description: 'The song has been successfully added to the playlist' })
+    @ApiResponse({ status: 400, description: 'Invalid playlist or song ID' })
+    async addSongToPlayList(
+        @Param('playListId') playListId: string,
+        @Param('songId') songId: string
+    ) {
+        try {
+            return this.playListService.addSongToPlayList(playListId, songId)
+        } catch (error) {
+            return { error: error.message }
+        }
+    }
+
+    @Delete('/:playlistId/:songId')
+    @UseGuards(JwtGuard)
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Delete Song from Playlist' })
+    @ApiResponse({ status: 200, description: 'The song has been successfully removed from the playlist' })
+    @ApiResponse({ status: 400, description: 'Invalid playlist or song ID' })
+    async deleteSongFromPlaylist(
+        @Param('playlistId') playlistId: string,
+        @Param('songId') songId: string
+    ) {
+        try {
+            return this.playListService.deleteSongFromPlayList(playlistId, songId)
+        } catch (error) {
+            return { error: error.message }
+        }
+    }
+    
     @Get('/:songId')
     @ApiOperation({ summary: 'Get Song by ID' })
     @ApiResponse({ status: 200, description: 'Return the song with the specified ID' })
     @ApiResponse({ status: 404, description: 'Song not found' })
     async getSongById(
-        @Param('songId', new ParseIntPipe({ errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE }))
-        songId: number
+        @Param('songId') songId: string
     ) {
         try {
             return this.songService.getSongById(songId);
@@ -48,30 +91,31 @@ export class SongController {
         }
     }
 
-    @Patch('/:songId')
+    @Patch('/:albumId/:songId')
+    @UseGuards(JwtGuard)
     @ApiOperation({ summary: 'Update Song' })
     @ApiResponse({ status: 200, description: 'Return the updated song data' })
     @ApiResponse({ status: 400, description: 'Invalid request or song not found' })
     @ApiBody({ type: SongDto })
     async updateSong(
-        @Param('songId', new ParseIntPipe({ errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE }))
-        songId: number,
+        @Param('albumId') albumId: string,
+        @Param('songId') songId: string,
         @Body() dto: SongDto
     ) {
         try {
-            return this.songService.updateSong(songId, dto);
+            return this.songService.updateSong(albumId, songId, dto);
         } catch (error) {
             return { error: error.message }
         }
     }
 
     @Delete('/:songId')
+    @UseGuards(JwtGuard)
     @ApiOperation({ summary: 'Delete Song by ID' })
     @ApiResponse({ status: 200, description: 'The song has been successfully deleted' })
     @ApiResponse({ status: 404, description: 'Song not found' })
     async deleteSong(
-        @Param('songId', new ParseIntPipe({ errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE }))
-        songId: number
+        @Param('songId') songId: string
     ) {
         try {
             return this.songService.deleteSong(songId);

@@ -6,12 +6,12 @@ import { NotFoundDataException } from 'src/utils/not-found.exception';
 @Injectable()
 export class SongService {
     constructor(private prisma: PrismaService) { }
-    async createSong(dto: SongDto) {
+    async createSong(albumId: string, dto: SongDto) {
         return this.prisma.song.create({
             data: {
                 title: dto.title,
                 duration: Number(dto.duration),
-                albumId: Number(dto.albumId)
+                albumId
             }
         })
     }
@@ -26,7 +26,7 @@ export class SongService {
         }
         return songs
     }
-    async getSongById(songId: number) {
+    async getSongById(songId: string) {
         const song = this.prisma.song.findUnique({
             where: { id: songId },
             include: {
@@ -42,7 +42,7 @@ export class SongService {
         }
         return song;
     }
-    async updateSong(songId: number, dto: SongDto) {
+    async updateSong(albumId: string, songId: string, dto: SongDto) {
         return this.prisma.song.update({
             where: {
                 id: songId
@@ -50,11 +50,11 @@ export class SongService {
             data: {
                 title: dto.title,
                 duration: Number(dto.duration),
-                albumId: Number(dto.albumId)
+                albumId
             }
         })
     }
-    async deleteSong(songId: number) {
+    async deleteSong(songId: string) {
         return this.prisma.song.delete({
             where: {
                 id: songId

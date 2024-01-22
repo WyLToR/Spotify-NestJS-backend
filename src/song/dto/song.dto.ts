@@ -12,14 +12,6 @@ export class SongDto {
     title: string;
 
     @ApiProperty({
-        description: "Album ID",
-        default: 1,
-        type: Number
-    })
-    @IsNotEmpty()
-    albumId: number;
-
-    @ApiProperty({
         description: "Duration of song",
         default: 4,
         type: Number
