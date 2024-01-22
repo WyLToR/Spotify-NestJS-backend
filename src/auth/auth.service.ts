@@ -16,7 +16,7 @@ export class AuthService {
     async createUser(dto: AuthDto) {
         const hash = await argon.hash(dto.password);
         try {
-            const user = this.prisma.user.create({
+            const user = await this.prisma.user.create({
                 data: {
                     email: dto.email,
                     hash,
@@ -24,7 +24,10 @@ export class AuthService {
                     lastName: dto.lastName
                 }
             })
-            return this.signToken((await user).id, (await user).email)
+            return {
+                userId: user.id,
+                token: await this.signToken(user.id, user.email)
+            }
         } catch (error) {
             if (error instanceof PrismaClientKnownRequestError) {
                 if (error.code === 'P2002') {
@@ -36,7 +39,7 @@ export class AuthService {
     async signToken(
         userId: string,
         email: string,
-    ): Promise<{ access_token: string }> {
+    ): Promise<string> {
         const payload = {
             sub: userId,
             email,
@@ -46,14 +49,11 @@ export class AuthService {
         const token = await this.jwt.signAsync(
             payload,
             {
-                expiresIn: '30m',
+                expiresIn: "2h",
                 secret: secret,
             },
         );
-
-        return {
-            access_token: token,
-        };
+        return token
     }
     async login(dto: AuthDto) {
         const user =
@@ -75,7 +75,10 @@ export class AuthService {
             throw new ForbiddenException(
                 'Credentials incorrect',
             );
-        return this.signToken(user.id, user.email);
+        return {
+            token: await this.signToken(user.id, user.email),
+            userId: user.id
+        }
     }
     async getAllUser() {
         return this.prisma.user.findMany({

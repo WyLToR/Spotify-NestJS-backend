@@ -13,7 +13,9 @@ export class AuthController {
     @ApiResponse({ status: 201, description: 'User successfully registered' })
     @ApiResponse({ status: 400, description: 'Bad Request' })
     @ApiBody({ type: AuthDto })
-    async registerUser(@Body() dto: AuthDto) {
+    async registerUser(
+        @Body() dto: AuthDto
+    ) {
         try {
             const user = await this.authService.createUser(dto);
             return { message: 'User successfully registered', user };
@@ -28,10 +30,12 @@ export class AuthController {
     @ApiResponse({ status: 401, description: 'Unauthorized' })
     @ApiResponse({ status: 400, description: 'Bad Request' })
     @ApiBody({ type: AuthDto })
-    async login(@Body() dto: AuthDto) {
+    async login(
+        @Body() dto: AuthDto
+    ) {
         try {
-            const token = await this.authService.login(dto);
-            return { message: 'User successfully logged in', token };
+            const { userId, token } = await this.authService.login(dto);
+            return { message: 'User successfully logged in', userId, token };
         } catch (error) {
             return { error: error.message };
         }
