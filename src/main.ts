@@ -12,11 +12,13 @@ async function bootstrap() {
     .setTitle('Spotify API')
     .setDescription('The Spotify API provides endpoints for managing songs, artists, and albums.')
     .setVersion('1.0')
+    .addBearerAuth()
     .addTag('song', 'Endpoints related to songs')
     .addTag('artist', 'Endpoints related to artists')
     .addTag('album', 'Endpoints related to albums')
     .addTag('authentication', 'Endpoints related to authentication')
     .addTag('user', 'Endpoints related to user')
+    .addTag('playlist', 'Endpoints related to playlist')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
