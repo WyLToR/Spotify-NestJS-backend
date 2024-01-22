@@ -1,5 +1,5 @@
 import { Controller, Post, Body, Param, Delete, UseGuards, Get } from '@nestjs/common';
-import { JwtGuard } from 'src/auth/guard';
+import { JwtGuard } from '../auth/guard';
 import { PlayListDto } from './dto';
 import { PlaylistService } from './playlist.service';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';

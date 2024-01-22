@@ -2,8 +2,8 @@ import { Controller, Post, Body, Get, Param, Patch, Delete, UseGuards } from '@n
 import { SongService } from './song.service';
 import { SongDto } from './dto';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { JwtGuard } from 'src/auth/guard';
-import { PlaylistService } from 'src/playlist/playlist.service';
+import { JwtGuard } from '../auth/guard';
+import { PlaylistService } from '../playlist/playlist.service';
 
 @ApiTags('song')
 @Controller('song')

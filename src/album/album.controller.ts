@@ -2,7 +2,7 @@ import { Controller, Post, Body, Get, Param, Patch, Delete, UseGuards } from '@n
 import { AlbumService } from './album.service';
 import { AlbumDto } from './dto';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { JwtGuard } from 'src/auth/guard';
+import { JwtGuard } from '../auth/guard';
 
 @Controller('album')
 @ApiTags('album')
