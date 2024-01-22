@@ -111,6 +111,7 @@ export class SongController {
 
     @Delete('/:songId')
     @UseGuards(JwtGuard)
+    @ApiBearerAuth()
     @ApiOperation({ summary: 'Delete Song by ID' })
     @ApiResponse({ status: 200, description: 'The song has been successfully deleted' })
     @ApiResponse({ status: 404, description: 'Song not found' })
