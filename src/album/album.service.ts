@@ -5,8 +5,8 @@ import { AlbumDto } from './dto';
 @Injectable()
 export class AlbumService {
     constructor(private prisma: PrismaService) { }
-    async createAlbum(dto: AlbumDto) {
-        return this.prisma.album.create({ data: { albumName: dto.albumName, artistId: Number(dto.artistId) } })
+    async createAlbum(artistId: string, dto: AlbumDto) {
+        return this.prisma.album.create({ data: { albumName: dto.albumName, artistId } })
     }
     async getAllAlbums() {
         const albums = await this.prisma.album.findMany({
@@ -19,7 +19,7 @@ export class AlbumService {
         }
         return albums
     }
-    async getAlbumById(albumId: number) {
+    async getAlbumById(albumId: string) {
         const album = await this.prisma.album.findUnique({
             where: {
                 id: albumId
@@ -34,18 +34,18 @@ export class AlbumService {
         }
         return album;
     }
-    async updateAlbum(albumId: number, dto: AlbumDto) {
+    async updateAlbum(artistId: string, albumId: string, dto: AlbumDto) {
         return this.prisma.album.update({
             where: {
                 id: albumId
             },
             data: {
                 albumName: dto.albumName,
-                artistId: Number(dto.artistId)
+                artistId: artistId
             }
         })
     }
-    async deleteAlbum(albumId: number) {
+    async deleteAlbum(albumId: string) {
         return this.prisma.album.delete({
             where: {
                 id: albumId

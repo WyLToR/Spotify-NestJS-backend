@@ -6,8 +6,4 @@ export class AlbumDto {
     @IsString()
     @IsNotEmpty()
     albumName: string;
-    
-    @ApiProperty()
-    @IsNotEmpty()
-    artistId: number;
 }
