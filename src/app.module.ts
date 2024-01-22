@@ -15,12 +15,15 @@ import { AuthService } from './auth/auth.service';
 import { AuthController } from './auth/auth.controller';
 import { AuthModule } from './auth/auth.module';
 import { JwtService } from '@nestjs/jwt';
+import { PlaylistService } from './playlist/playlist.service';
+import { PlaylistController } from './playlist/playlist.controller';
+import { PlaylistModule } from './playlist/playlist.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
     isGlobal: true,
-  }), PrismaModule, AlbumModule, SongModule, ArtistModule, AuthModule],
-  providers: [ArtistService, AlbumService, SongService, AuthService, JwtService],
-  controllers: [ArtistController, AlbumController, SongController, UserController, AuthController],
+  }), PrismaModule, AlbumModule, SongModule, ArtistModule, AuthModule, PlaylistModule],
+  providers: [ArtistService, AlbumService, SongService, AuthService, JwtService, PlaylistService],
+  controllers: [ArtistController, AlbumController, SongController, UserController, AuthController, PlaylistController],
 })
 export class AppModule { }
