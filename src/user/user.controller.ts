@@ -1,6 +1,6 @@
 import { Controller, UseGuards, Patch, Param, Body, Delete} from '@nestjs/common';
 import { JwtGuard } from '../auth/guard';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from 'src/auth/auth.service';
 import { AuthDto } from 'src/auth/dto';
 
@@ -9,31 +9,35 @@ import { AuthDto } from 'src/auth/dto';
 @ApiTags('user')
 export class UserController {
     constructor(private readonly authService: AuthService) { }
+
     @Patch("/:userId")
-    @ApiOperation({ summary: 'Get Artist by ID' })
-    @ApiResponse({ status: 200, description: 'Return deleted email, firstName, lastName' })
-    @ApiResponse({ status: 404, description: 'User not found' })
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Update User' })
+    @ApiResponse({ status: 200, description: 'Return updated user data' })
+    @ApiResponse({ status: 400, description: 'Invalid request or user not found' })
+    @ApiBody({ type: AuthDto })
     async updateUser(
         @Param('userId') userId: string,
         @Body() dto: AuthDto
     ) {
         try {
-            return this.authService.updateUser(userId, dto)
+            return this.authService.updateUser(userId, dto);
         } catch (error) {
-            return { error: error.message }
+            return { error: error.message };
         }
     }
     @Delete("/:userId")
-    @ApiOperation({ summary: 'Delete user By ID' })
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Delete User by ID' })
     @ApiResponse({ status: 200, description: 'Return deleted email, firstName, lastName' })
     @ApiResponse({ status: 404, description: 'User not found' })
     async deleteUser(
-        @Param('userId') userId: string,
+        @Param('userId') userId: string
     ) {
         try {
-            return this.authService.deleteUser(userId)
+            return this.authService.deleteUser(userId);
         } catch (error) {
-            return { error: error.message }
+            return { error: error.message };
         }
     }
 }
