@@ -26,7 +26,7 @@ export class ArtistService {
         }
         return artists
     }
-    async getArtistById(artistId: number) {
+    async getArtistById(artistId: string) {
         const artist = await this.prisma.artist.findUnique({
             where: {
                 id: artistId
@@ -45,7 +45,7 @@ export class ArtistService {
         }
         return artist
     }
-    async updateArtist(artistId: number, dto: ArtistDto) {
+    async updateArtist(artistId: string, dto: ArtistDto) {
         return await this.prisma.artist.update({
             where: {
                 id: artistId
@@ -53,7 +53,7 @@ export class ArtistService {
             data: dto
         })
     }
-    async deleteArtist(artistId: number) {
+    async deleteArtist(artistId: string) {
         return this.prisma.artist.delete({
             where: {
                 id: artistId

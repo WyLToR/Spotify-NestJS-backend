@@ -1,7 +1,8 @@
-import { Controller, Post, Body, Get, Param, HttpStatus, ParseIntPipe, Patch, Delete } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, Patch, Delete, UseGuards } from '@nestjs/common';
 import { ArtistService } from './artist.service';
 import { ArtistDto } from './dto';
-import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { JwtGuard } from 'src/auth/guard';
 
 @Controller('artist')
 @ApiTags('artist')
@@ -9,11 +10,15 @@ export class ArtistController {
     constructor(private readonly artistService: ArtistService) { }
 
     @Post('/')
+    @UseGuards(JwtGuard)
+    @ApiBearerAuth()
     @ApiOperation({ summary: 'Create New Artist' })
     @ApiResponse({ status: 201, description: 'The artist has been successfully created' })
     @ApiResponse({ status: 400, description: 'Request body format is incorrect' })
     @ApiBody({ type: ArtistDto })
-    createArtist(@Body() dto: ArtistDto) {
+    createArtist(
+        @Body() dto: ArtistDto
+    ) {
         try {
             return this.artistService.createArtist(dto);
         } catch (error) {
@@ -38,8 +43,7 @@ export class ArtistController {
     @ApiResponse({ status: 200, description: 'Return the artist with the specified ID' })
     @ApiResponse({ status: 404, description: 'Artist not found' })
     async getArtistById(
-        @Param('artistId', new ParseIntPipe({ errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE }))
-        artistId: number
+        @Param('artistId') artistId: string
     ) {
         try {
             return this.artistService.getArtistById(artistId);
@@ -49,13 +53,14 @@ export class ArtistController {
     }
 
     @Patch('/:artistId')
+    @UseGuards(JwtGuard)
+    @ApiBearerAuth()
     @ApiOperation({ summary: 'Update Artist' })
     @ApiResponse({ status: 200, description: 'Return the updated artist data' })
     @ApiResponse({ status: 400, description: 'Invalid request or artist not found' })
     @ApiBody({ type: ArtistDto })
     async updateArtist(
-        @Param('artistId', new ParseIntPipe({ errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE }))
-        artistId: number,
+        @Param('artistId') artistId: string,
         @Body() dto: ArtistDto
     ) {
         try {
@@ -66,12 +71,13 @@ export class ArtistController {
     }
 
     @Delete('/:artistId')
+    @UseGuards(JwtGuard)
+    @ApiBearerAuth()
     @ApiOperation({ summary: 'Delete Artist by ID' })
     @ApiResponse({ status: 200, description: 'The artist has been successfully deleted' })
     @ApiResponse({ status: 404, description: 'Artist not found' })
     async deleteArtist(
-        @Param('artistId', new ParseIntPipe({ errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE }))
-        artistId: number
+        @Param('artistId') artistId: string
     ) {
         try {
             return this.artistService.deleteArtist(artistId);
