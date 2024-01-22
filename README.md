@@ -1,73 +1,187 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+```markdown
+# Song database Nest-JS
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+## Overview
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+This is a NestJS-based API project that provides endpoints for managing songs, albums, artists, playlists, user authentication, and more.
 
-## Description
+## Features
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- Create, update, and delete songs, albums, and artists.
+- Manage playlists, add or remove songs from playlists.
+- User authentication for creating accounts and logging in.
 
 ## Installation
 
-```bash
-$ yarn install
-```
+1. Clone the repository:
 
-## Running the app
+   ```bash
+   git clone https://github.com/WyLToR/Spotify-NestJS-base.git
+   ```
 
-```bash
-# development
-$ yarn run start
+2. Install dependencies:
 
-# watch mode
-$ yarn run start:dev
+   ```bash
+   cd Spotify-NestJS-base
+   yarn install
+   ```
 
-# production mode
-$ yarn run start:prod
-```
+3. Set up your database connection in the `env` file.
 
-## Test
+4. Run the application:
 
-```bash
-# unit tests
-$ yarn run test
+   ```bash
+   yarn start:dev
+   ```
 
-# e2e tests
-$ yarn run test:e2e
+   The API will be accessible at `http://localhost:8081`.
 
-# test coverage
-$ yarn run test:cov
-```
+## API Endpoints
 
-## Support
+### Songs
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+- **Create New Song:**
 
-## Stay in touch
+  `POST /song/:albumId`
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+- **Get All Songs:**
 
-## License
+  `GET /song`
 
-Nest is [MIT licensed](LICENSE).
+- **Get Song by ID:**
+
+  `GET /song/:songId`
+
+- **Update Song:**
+
+  `PATCH /song/:albumId/:songId`
+
+- **Delete Song:**
+
+  `DELETE /song/:songId`
+
+### Albums
+
+- **Create New Album:**
+
+  `POST /album/:artistId`
+
+- **Get All Albums:**
+
+  `GET /album`
+
+- **Get Album by ID:**
+
+  `GET /album/:albumId`
+
+- **Update Album:**
+
+  `PATCH /album/:artistId/:albumId`
+
+- **Delete Album:**
+
+  `DELETE /album/:albumId`
+
+### Artists
+
+- **Create New Artist:**
+
+  `POST /artist`
+
+- **Get All Artists:**
+
+  `GET /artist`
+
+- **Get Artist by ID:**
+
+  `GET /artist/:artistId`
+
+- **Update Artist:**
+
+  `PATCH /artist/:artistId`
+
+- **Delete Artist:**
+
+  `DELETE /artist/:artistId`
+
+### Playlists
+
+- **Create Playlist:**
+
+  `POST /playlist/:userId`
+
+- **Get All Playlists of a User:**
+
+  `GET /playlist/user/:userId`
+
+- **Get Playlist by ID:**
+
+  `GET /playlist/:playlistId`
+
+- **Delete Playlist by ID:**
+
+  `DELETE /playlist/:playlistId`
+
+## Authentication
+
+- **Register User:**
+
+  `POST /auth/register`
+
+- **User Login:**
+
+  `POST /auth/login`
+
+## Authentication-Protected Endpoints
+
+For the following endpoints, a Bearer Token is required in the Authorization header:
+
+- **User:**
+    - *Update User:* `PATCH /user/:userId`
+    - *Delete User:* `DELETE /user/:userId`
+
+- **Playlist:**
+    - *Create Playlist:* `POST /playlist/:userId`
+    - *Get All Playlists of a User:* `GET /playlist/user/:userId`
+    - *Get Playlist by ID:* `GET /playlist/:playlistId`
+    - *Delete Playlist by ID:* `DELETE /playlist/:playlistId`
+    - *Delete Song from Playlist:* `DELETE /:playlistId/:songId`
+
+- **Artist:**
+    - *Create New Artist:* `POST /artist`
+    - *Update Artist:* `PATCH /artist/:artistId`
+    - *Delete Artist:* `DELETE /artist/:artistId`
+
+- **Album:**
+    - *Create New Album:* `POST /album/:artistId`
+    - *Update Album:* `PATCH /album/:artistId/:albumId`
+    - *Delete Album:* `DELETE /album/:albumId`
+
+- **Song:**
+    - *Create New Song:* `POST /song/:albumId`
+    - *Update Song:* `PATCH /song/:albumId/:songId`
+    - *Delete Song:* `DELETE /song/:songId`
+
+## Usage
+
+To use the API, you can make HTTP requests to the provided endpoints using your preferred tool (e.g., curl, Postman, or any frontend framework with fetch).
+
+Make sure to include the Bearer Token in the Authorization header for protected endpoints.
+
+`header:{
+  'Authorization':'Bearer <token>'
+}
+`
+
+## About the Author
+
+This NestJS API project was developed with love and dedication by [Your Name].
+
+Feel free to connect with me:
+
+- Email: [bekesi.patrik@gmail.com](mailto:bekesi.patrik@gmail.com)
+- GitHub: [WyLToR](https://github.com/WyLToR/)
+
+If you find any issues, have suggestions, or just want to chat about the project, don't hesitate to reach out. Contributions and feedback are always welcome!
+
+**Happy coding!**
