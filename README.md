@@ -131,6 +131,14 @@ This is a NestJS-based API project that provides endpoints for managing songs, a
 - **User Login:**
 
   `POST /auth/login`
+## Admin
+
+- **Get All User:**
+
+  `GET /admin/users`
+- **Switch User Role**
+
+  `PATCH /admin/role/:userId`
 
 ## Authentication-Protected Endpoints
 
@@ -139,28 +147,30 @@ For the following endpoints, a Bearer Token is required in the Authorization hea
 - **User:**
     - *Update User:* `PATCH /user/:userId`
     - *Delete User:* `DELETE /user/:userId`
+    - *Get All User: (only admin)* `GET /admin/users`
+    - *Switch Role: (only admin)* `PATCH /admin/role/:userId`
 
 - **Playlist:**
-    - *Create Playlist:* `POST /playlist/:userId`
+    - *Create Playlist: (only admin)* `POST /playlist/:userId`
     - *Get All Playlists of a User:* `GET /playlist/user/:userId`
     - *Get Playlist by ID:* `GET /playlist/:playlistId`
     - *Delete Playlist by ID:* `DELETE /playlist/:playlistId`
     - *Delete Song from Playlist:* `DELETE /:playlistId/:songId`
 
 - **Artist:**
-    - *Create New Artist:* `POST /artist`
-    - *Update Artist:* `PATCH /artist/:artistId`
-    - *Delete Artist:* `DELETE /artist/:artistId`
+    - *Create New Artist: (only admin)* `POST /artist`
+    - *Update Artist: (only admin)* `PATCH /artist/:artistId`
+    - *Delete Artist: (only admin)* `DELETE /artist/:artistId`
 
 - **Album:**
-    - *Create New Album:* `POST /album/:artistId`
-    - *Update Album:* `PATCH /album/:artistId/:albumId`
-    - *Delete Album:* `DELETE /album/:albumId`
+    - *Create New Album: (only admin)* `POST /album/:artistId`
+    - *Update Album: (only admin)* `PATCH /album/:artistId/:albumId`
+    - *Delete Album: (only admin)* `DELETE /album/:albumId`
 
 - **Song:**
-    - *Create New Song:* `POST /song/:albumId`
-    - *Update Song:* `PATCH /song/:albumId/:songId`
-    - *Delete Song:* `DELETE /song/:songId`
+    - *Create New Song: (only admin)* `POST /song/:albumId`
+    - *Update Song: (only admin)* `PATCH /song/:albumId/:songId`
+    - *Delete Song: (only admin)* `DELETE /song/:songId`
 
 ## Usage
 
