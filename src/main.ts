@@ -19,6 +19,7 @@ async function bootstrap() {
     .addTag('authentication', 'Endpoints related to authentication')
     .addTag('user', 'Endpoints related to user')
     .addTag('playlist', 'Endpoints related to playlist')
+    .addTag('admin','Endpoints related to admin')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
