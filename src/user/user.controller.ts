@@ -3,14 +3,17 @@ import { JwtGuard } from '../auth/guard';
 import { ApiOperation, ApiResponse, ApiTags, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from '../auth/auth.service';
 import { AuthDto } from '../auth/dto';
+import { RolesGuard } from '../auth/roles';
+import { Roles } from '../auth/decorators';
+import { Role } from '@prisma/client';
 
-@UseGuards(JwtGuard)
+@UseGuards(JwtGuard, RolesGuard)
 @Controller('user')
 @ApiTags('user')
 export class UserController {
     constructor(private readonly authService: AuthService) { }
-
     @Patch("/:userId")
+    @Roles(Role.USER, Role.ADMIN)
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Update User' })
     @ApiResponse({ status: 200, description: 'Return updated user data' })
@@ -27,6 +30,7 @@ export class UserController {
         }
     }
     @Delete("/:userId")
+    @Roles(Role.USER, Role.ADMIN)
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Delete User by ID' })
     @ApiResponse({ status: 200, description: 'Return deleted email, firstName, lastName' })

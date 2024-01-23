@@ -3,6 +3,9 @@ import { ArtistService } from './artist.service';
 import { ArtistDto } from './dto';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtGuard } from '../auth/guard';
+import { RolesGuard } from '../auth/roles';
+import { Roles } from '../auth/decorators';
+import Role from '../utils/role.enum';
 
 @Controller('artist')
 @ApiTags('artist')
@@ -10,7 +13,7 @@ export class ArtistController {
     constructor(private readonly artistService: ArtistService) { }
 
     @Post('/')
-    @UseGuards(JwtGuard)
+    @UseGuards(JwtGuard, RolesGuard)
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Create New Artist' })
     @ApiResponse({ status: 201, description: 'The artist has been successfully created' })
@@ -27,6 +30,7 @@ export class ArtistController {
     }
 
     @Get('/')
+    @Roles(Role.USER, Role.ADMIN)
     @ApiOperation({ summary: 'Get All Artists' })
     @ApiResponse({ status: 200, description: 'Return all artists' })
     @ApiResponse({ status: 404, description: 'Artists not found' })
@@ -39,6 +43,7 @@ export class ArtistController {
     }
 
     @Get('/:artistId')
+    @Roles(Role.USER, Role.ADMIN)
     @ApiOperation({ summary: 'Get Artist by ID' })
     @ApiResponse({ status: 200, description: 'Return the artist with the specified ID' })
     @ApiResponse({ status: 404, description: 'Artist not found' })
@@ -53,7 +58,8 @@ export class ArtistController {
     }
 
     @Patch('/:artistId')
-    @UseGuards(JwtGuard)
+    @UseGuards(JwtGuard, RolesGuard)
+    @Roles( Role.ADMIN)
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Update Artist' })
     @ApiResponse({ status: 200, description: 'Return the updated artist data' })
@@ -71,7 +77,8 @@ export class ArtistController {
     }
 
     @Delete('/:artistId')
-    @UseGuards(JwtGuard)
+    @UseGuards(JwtGuard, RolesGuard)
+    @Roles( Role.ADMIN)
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Delete Artist by ID' })
     @ApiResponse({ status: 200, description: 'The artist has been successfully deleted' })

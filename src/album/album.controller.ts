@@ -3,6 +3,9 @@ import { AlbumService } from './album.service';
 import { AlbumDto } from './dto';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtGuard } from '../auth/guard';
+import { RolesGuard } from '../auth/roles';
+import { Roles } from '../auth/decorators';
+import Role from '../utils/role.enum';
 
 @Controller('album')
 @ApiTags('album')
@@ -10,7 +13,8 @@ export class AlbumController {
     constructor(private readonly albumService: AlbumService) { }
 
     @Post('/:artistId')
-    @UseGuards(JwtGuard)
+    @UseGuards(JwtGuard, RolesGuard)
+    @Roles( Role.ADMIN)
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Create New Album' })
     @ApiResponse({ status: 201, description: 'The album has been successfully created' })
@@ -28,6 +32,7 @@ export class AlbumController {
     }
 
     @Get('/')
+    @Roles(Role.USER, Role.ADMIN)
     @ApiOperation({ summary: 'Get All Albums' })
     @ApiResponse({ status: 200, description: 'Return all albums' })
     @ApiResponse({ status: 404, description: 'Albums not found' })
@@ -40,6 +45,7 @@ export class AlbumController {
     }
 
     @Get('/:albumId')
+    @Roles(Role.USER, Role.ADMIN)
     @ApiOperation({ summary: 'Get Album by ID' })
     @ApiResponse({ status: 200, description: 'Return the album with the specified ID' })
     @ApiResponse({ status: 404, description: 'Album not found' })
@@ -54,7 +60,8 @@ export class AlbumController {
     }
 
     @Patch('/:artistId/:albumId')
-    @UseGuards(JwtGuard)
+    @UseGuards(JwtGuard, RolesGuard)
+    @Roles( Role.ADMIN)
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Update Album' })
     @ApiResponse({ status: 200, description: 'Return the updated album data' })
@@ -73,7 +80,8 @@ export class AlbumController {
     }
 
     @Delete('/:albumId')
-    @UseGuards(JwtGuard)
+    @UseGuards(JwtGuard, RolesGuard)
+    @Roles( Role.ADMIN)
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Delete Album by ID' })
     @ApiResponse({ status: 200, description: 'The album has been successfully deleted' })
