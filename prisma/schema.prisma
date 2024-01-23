@@ -11,7 +11,7 @@ datasource db {
 }
 
 model Artist {
-  id        String     @id @default(cuid())
+  id        String  @id @default(cuid())
   name      String  @unique
   genre     String
   biography String
@@ -19,7 +19,7 @@ model Artist {
 }
 
 model Album {
-  id        String    @id @default(cuid())
+  id        String @id @default(cuid())
   albumName String
   artistId  String
   artist    Artist @relation(fields: [artistId], references: [id], onDelete: Cascade)
@@ -27,7 +27,7 @@ model Album {
 }
 
 model Song {
-  id       String    @id @default(cuid())
+  id       String @id @default(cuid())
   albumId  String
   album    Album  @relation(fields: [albumId], references: [id], onDelete: Cascade)
   title    String
@@ -40,8 +40,10 @@ model User {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
 
-  email     String   @unique
-  hash      String
+  email String @unique
+  hash  String
+
+  role  Role @default(USER)
 
   firstName String?
   lastName  String?
@@ -53,21 +55,26 @@ model PlayList {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
 
-  title   String
+  title String
 
-  userId  String    
-  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   playlistSongs PlaylistSong[]
 }
 
 model PlaylistSong {
-  id          String   @id @default(cuid())
-  createdAt   DateTime @default(now())
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
 
-  playlistId  String
-  playlist    PlayList @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  playlistId String
+  playlist   PlayList @relation(fields: [playlistId], references: [id], onDelete: Cascade)
 
-  songId      String
-  song        Song     @relation(fields: [songId], references: [id]) 
+  songId String
+  song   Song   @relation(fields: [songId], references: [id])
+}
+
+enum Role {
+  USER
+  ADMIN
 }
