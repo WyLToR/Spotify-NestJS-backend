@@ -52,6 +52,10 @@ This is a NestJS-based API project that provides endpoints for managing songs, a
 
   `GET /song/:songId`
 
+- **Get Song file by ID:**
+
+  `GET /song/upload/:filePath`
+
 - **Update Song:**
 
   `PATCH /song/:albumId/:songId`
