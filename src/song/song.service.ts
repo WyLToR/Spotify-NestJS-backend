@@ -6,12 +6,12 @@ import { NotFoundDataException } from '../utils/not-found.exception';
 @Injectable()
 export class SongService {
     constructor(private prisma: PrismaService) { }
-    async createSong(albumId: string, dto: SongDto) {
+    async createSong(albumId: string, dto: SongDto, songPath: string) {
         return this.prisma.song.create({
             data: {
                 title: dto.title,
-                duration: Number(dto.duration),
-                albumId
+                albumId,
+                songPath,
             }
         })
     }
@@ -42,15 +42,15 @@ export class SongService {
         }
         return song;
     }
-    async updateSong(albumId: string, songId: string, dto: SongDto) {
+    async updateSong(albumId: string, songId: string, dto: SongDto, songPath: string) {
         return this.prisma.song.update({
             where: {
                 id: songId
             },
             data: {
                 title: dto.title,
-                duration: Number(dto.duration),
-                albumId
+                albumId,
+                songPath,
             }
         })
     }

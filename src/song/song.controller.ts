@@ -1,4 +1,17 @@
-import { Controller, Post, Body, Get, Param, Patch, Delete, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpStatus,
+  Param,
+  ParseFilePipeBuilder,
+  Patch,
+  Post, Res,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
 import { SongService } from './song.service';
 import { SongDto } from './dto';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -7,6 +20,16 @@ import { PlaylistService } from '../playlist/playlist.service';
 import { RolesGuard } from '../auth/roles';
 import { Roles } from '../auth/decorators';
 import Role from '../utils/role.enum';
+import { CustomUploadFileTypeValidator } from './validator';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { Response } from 'express';
+import * as path from 'path';
+
+const MAX_SONG_SIZE = 2 * 1024 * 1024;
+const VALID_UPLOAD_MIME_TYPES = [
+  'audio/mpeg', 'audio/aac', 'audio/midi', 'audio/x-midi',
+  'audio/ogg', 'audio/opus', 'audio/wav', 'audio/webm',
+];
 
 @ApiTags('song')
 @Controller('song')
@@ -21,6 +44,7 @@ export class SongController {
   @UseGuards(JwtGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
+  @UseInterceptors(FileInterceptor('songFile'))
   @ApiOperation({ summary: 'Create New Song' })
   @ApiResponse({ status: 201, description: 'The song has been successfully created' })
   @ApiResponse({ status: 400, description: 'Request body format is incorrect' })
@@ -28,9 +52,21 @@ export class SongController {
   async createSong(
     @Param('albumId') albumId: string,
     @Body() dto: SongDto,
+    @UploadedFile(
+      new ParseFilePipeBuilder()
+        .addValidator(
+          new CustomUploadFileTypeValidator({
+            fileType: VALID_UPLOAD_MIME_TYPES,
+          }),
+        )
+        .addMaxSizeValidator({ maxSize: MAX_SONG_SIZE })
+        .build({ errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY })
+      ,
+    )
+      songFile: Express.Multer.File,
   ) {
     try {
-      return this.songService.createSong(albumId, dto);
+      return this.songService.createSong(albumId, dto, songFile.path);
     } catch (error) {
       return { error: error.message };
     }
@@ -99,9 +135,16 @@ export class SongController {
     }
   }
 
+  @Get('/upload/:fileName')
+  async downloadFile(@Param('fileName') fileName: string, @Res() res: Response): Promise<void> {
+    console.log('megszólítva')
+    res.sendFile(path.join(__dirname,"../../upload/", fileName));
+  }
+
   @Patch('/:albumId/:songId')
   @UseGuards(JwtGuard, RolesGuard)
   @Roles(Role.ADMIN)
+  @UseInterceptors(FileInterceptor('songFile'))
   @ApiOperation({ summary: 'Update Song' })
   @ApiResponse({ status: 200, description: 'Return the updated song data' })
   @ApiResponse({ status: 400, description: 'Invalid request or song not found' })
@@ -110,9 +153,21 @@ export class SongController {
     @Param('albumId') albumId: string,
     @Param('songId') songId: string,
     @Body() dto: SongDto,
+    @UploadedFile(
+      new ParseFilePipeBuilder()
+        .addValidator(
+          new CustomUploadFileTypeValidator({
+            fileType: VALID_UPLOAD_MIME_TYPES,
+          }),
+        )
+        .addMaxSizeValidator({ maxSize: MAX_SONG_SIZE })
+        .build({ errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY })
+      ,
+    )
+      songFile: Express.Multer.File,
   ) {
     try {
-      return this.songService.updateSong(albumId, songId, dto);
+      return this.songService.updateSong(albumId, songId, dto, songFile.path);
     } catch (error) {
       return { error: error.message };
     }
