@@ -31,7 +31,7 @@ model Song {
   albumId  String
   album    Album  @relation(fields: [albumId], references: [id], onDelete: Cascade)
   title    String
-  duration Int
+  songPath String
 
   playlistSongs PlaylistSong[]
 }
@@ -43,7 +43,7 @@ model User {
   email String @unique
   hash  String
 
-  role  Role @default(USER)
+  role Role @default(USER)
 
   firstName String?
   lastName  String?
