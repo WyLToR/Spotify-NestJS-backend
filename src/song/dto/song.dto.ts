@@ -1,5 +1,5 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { IsString, IsNotEmpty } from "class-validator";
+import {ApiProperty} from "@nestjs/swagger";
+import {IsString, IsNotEmpty} from "class-validator";
 
 export class SongDto {
     @ApiProperty({
@@ -10,12 +10,4 @@ export class SongDto {
     @IsString()
     @IsNotEmpty()
     title: string;
-
-    @ApiProperty({
-        description: "Duration of song",
-        default: 4,
-        type: Number
-    })
-    @IsNotEmpty()
-    duration: number;
 }
