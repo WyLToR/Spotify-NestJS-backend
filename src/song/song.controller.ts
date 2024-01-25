@@ -25,11 +25,13 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
 import * as path from 'path';
 
+
 const MAX_SONG_SIZE = 2 * 1024 * 1024;
 const VALID_UPLOAD_MIME_TYPES = [
   'audio/mpeg', 'audio/aac', 'audio/midi', 'audio/x-midi',
   'audio/ogg', 'audio/opus', 'audio/wav', 'audio/webm',
 ];
+
 
 @ApiTags('song')
 @Controller('song')
@@ -48,7 +50,16 @@ export class SongController {
   @ApiOperation({ summary: 'Create New Song' })
   @ApiResponse({ status: 201, description: 'The song has been successfully created' })
   @ApiResponse({ status: 400, description: 'Request body format is incorrect' })
-  @ApiBody({ type: SongDto })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        title: { type: 'string' },
+        songFile: { type: 'string', format: 'binary' },
+      },
+      required: ['title', 'songFile'],
+    },
+  })
   async createSong(
     @Param('albumId') albumId: string,
     @Body() dto: SongDto,
@@ -136,9 +147,11 @@ export class SongController {
   }
 
   @Get('/upload/:fileName')
+  @ApiOperation({ summary: 'Get Song Data' })
+  @ApiResponse({ status: 200, description: 'Return the song file' })
+  @ApiResponse({ status: 404, description: 'Song not found' })
   async downloadFile(@Param('fileName') fileName: string, @Res() res: Response): Promise<void> {
-    console.log('megszólítva')
-    res.sendFile(path.join(__dirname,"../../upload/", fileName));
+    res.sendFile(path.join(__dirname, '../../upload/', fileName));
   }
 
   @Patch('/:albumId/:songId')
@@ -148,7 +161,16 @@ export class SongController {
   @ApiOperation({ summary: 'Update Song' })
   @ApiResponse({ status: 200, description: 'Return the updated song data' })
   @ApiResponse({ status: 400, description: 'Invalid request or song not found' })
-  @ApiBody({ type: SongDto })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        title: { type: 'string' },
+        songFile: { type: 'string', format: 'binary' },
+      },
+      required: ['title', 'songFile'],
+    },
+  })
   async updateSong(
     @Param('albumId') albumId: string,
     @Param('songId') songId: string,
