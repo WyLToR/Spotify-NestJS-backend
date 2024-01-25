@@ -98,6 +98,7 @@ export class AuthService {
         'Credentials incorrect',
       );
     }
+    const hash = await argon.hash(dto.password);
     const updatedUser = await this.prisma.user.update({
       where: {
         id: userId,
@@ -107,7 +108,7 @@ export class AuthService {
         email: dto.email,
         firstName: dto.firstName || user.firstName,
         lastName: dto.lastName || user.lastName,
-        hash: user.hash,
+        hash
       },
     });
     delete updatedUser.hash;
