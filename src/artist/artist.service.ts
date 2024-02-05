@@ -35,7 +35,8 @@ export class ArtistService {
                 albums: {
                     select: {
                         id: true,
-                        albumName: true
+                        albumName: true,
+                        songs: true
                     }
                 }
             }
