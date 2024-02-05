@@ -21,6 +21,8 @@ import { PlaylistModule } from './playlist/playlist.module';
 import { AdminController } from './admin/admin.controller';
 import { MulterModule } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
+import { FirebaseService } from './firebase/firebase.service';
+import { FirebaseModule } from './firebase/firebase.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
@@ -28,20 +30,11 @@ import { diskStorage } from 'multer';
   }), MulterModule.registerAsync({
     imports: [ConfigModule],
     useFactory: async () => ({
-      storage: diskStorage({
-        destination: './upload',
-        filename: (_, file, cb) => {
-          const unique = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-          const originalName = file.originalname;
-          const extension = originalName.split('.').pop();
-          const fileName = `${unique}.${extension}`;
-          cb(null, fileName);
-        },
-      }),
+      storage: diskStorage({}),
     }),
     inject: [ConfigService],
-  }), PrismaModule, AlbumModule, SongModule, ArtistModule, AuthModule, PlaylistModule],
-  providers: [ArtistService, AlbumService, SongService, AuthService, JwtService, PlaylistService],
+  }), PrismaModule, AlbumModule, SongModule, ArtistModule, AuthModule, PlaylistModule, FirebaseModule],
+  providers: [ArtistService, AlbumService, SongService, AuthService, JwtService, PlaylistService, FirebaseService],
   controllers: [ArtistController, AlbumController, SongController, UserController, AuthController, PlaylistController, AdminController],
 })
 export class AppModule {
