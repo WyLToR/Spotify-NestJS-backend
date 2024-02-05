@@ -10,7 +10,8 @@ export class AlbumService {
     }
     async getAllAlbums() {
         const albums = await this.prisma.album.findMany({
-            include: {
+            include:{
+                artist: true,
                 songs: true
             }
         })
