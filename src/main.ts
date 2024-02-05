@@ -3,11 +3,19 @@ import { AppModule } from './app.module';
 import { env } from 'process';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
+import * as admin from 'firebase-admin';
+
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors();
-
+  if (!admin.apps.length) {
+    const serviceAccount = require('../socloud-c68fb-firebase-adminsdk-2ir21-5d2de1354d.json');
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+      storageBucket: process.env.FIREBASE,
+    });
+  }
   const config = new DocumentBuilder()
     .setTitle('Spotify API')
     .setDescription('The Spotify API provides endpoints for managing songs, artists, and albums.')
@@ -19,7 +27,7 @@ async function bootstrap() {
     .addTag('authentication', 'Endpoints related to authentication')
     .addTag('user', 'Endpoints related to user')
     .addTag('playlist', 'Endpoints related to playlist')
-    .addTag('admin','Endpoints related to admin')
+    .addTag('admin', 'Endpoints related to admin')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
