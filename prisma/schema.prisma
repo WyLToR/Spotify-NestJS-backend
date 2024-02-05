@@ -32,6 +32,7 @@ model Song {
   album    Album  @relation(fields: [albumId], references: [id], onDelete: Cascade)
   title    String
   songPath String
+  url      String
 
   playlistSongs PlaylistSong[]
 }

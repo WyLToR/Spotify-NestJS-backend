@@ -26,6 +26,7 @@ CREATE TABLE "Song" (
     "albumId" TEXT NOT NULL,
     "title" TEXT NOT NULL,
     "songPath" TEXT NOT NULL,
+    "url" TEXT NOT NULL,
 
     CONSTRAINT "Song_pkey" PRIMARY KEY ("id")
 );
