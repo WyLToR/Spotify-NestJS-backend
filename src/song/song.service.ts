@@ -2,23 +2,29 @@ import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { PrismaService } from '../db/prisma.service';
 import { SongDto } from './dto';
 import { NotFoundDataException } from '../utils/not-found.exception';
+import { FirebaseService } from 'src/firebase/firebase.service';
 
 @Injectable()
 export class SongService {
-    constructor(private prisma: PrismaService) { }
-    async createSong(albumId: string, dto: SongDto, songPath: string) {
+    constructor(private prisma: PrismaService, private readonly firebaseService: FirebaseService) { }
+    async createSong(albumId: string, dto: SongDto, songPath: string, url: string) {
         return this.prisma.song.create({
             data: {
                 title: dto.title,
                 albumId,
                 songPath,
+                url
             }
         })
     }
     async getAllSong() {
         const songs = await this.prisma.song.findMany({
             include: {
-                album: true,
+                album: {
+                    include: {
+                        artist: true
+                    }
+                }
             }
         })
         if (!songs) {
@@ -42,7 +48,16 @@ export class SongService {
         }
         return song;
     }
-    async updateSong(albumId: string, songId: string, dto: SongDto, songPath: string) {
+    async updateSong(albumId: string, songId: string, dto: SongDto, songPath: string, url: string) {
+        const oldSongData = await this.prisma.song.findUnique({
+            where: {
+                id: songId
+            }
+        })
+        if (oldSongData.songPath) {
+            const oldFile = this.firebaseService.getStorageInstance().bucket().file(oldSongData.url);
+            await oldFile.delete();
+        }
         return this.prisma.song.update({
             where: {
                 id: songId
@@ -51,10 +66,19 @@ export class SongService {
                 title: dto.title,
                 albumId,
                 songPath,
+                url
+
             }
         })
     }
     async deleteSong(songId: string) {
+        const song = await this.prisma.song.findUnique({
+            where: {
+                id: songId
+            }
+        })
+        const file = this.firebaseService.getStorageInstance().bucket().file(song.url)
+        await file.delete()
         return this.prisma.song.delete({
             where: {
                 id: songId

@@ -24,6 +24,7 @@ import { CustomUploadFileTypeValidator } from './validator';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
 import * as path from 'path';
+import { FirebaseService } from 'src/firebase/firebase.service';
 
 
 const MAX_SONG_SIZE = 2 * 1024 * 1024;
@@ -39,6 +40,7 @@ export class SongController {
   constructor(
     private readonly songService: SongService,
     private readonly playListService: PlaylistService,
+    private readonly firebaseSerivce: FirebaseService,
   ) {
   }
 
@@ -62,7 +64,7 @@ export class SongController {
   })
   async createSong(
     @Param('albumId') albumId: string,
-    @Body() dto: SongDto,
+    @Body() dto: any,
     @UploadedFile(
       new ParseFilePipeBuilder()
         .addValidator(
@@ -74,10 +76,21 @@ export class SongController {
         .build({ errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY })
       ,
     )
-      songFile: Express.Multer.File,
+    songFile: Express.Multer.File,
   ) {
     try {
-      return this.songService.createSong(albumId, dto, songFile.path);
+      const storage = this.firebaseSerivce.getStorageInstance();
+      const path = `song/${albumId}/${songFile.originalname}`;
+      await storage.bucket().upload(songFile.path, {
+        destination: path,
+      });
+
+      const file = storage.bucket().file(path);
+      const [publicUrl] = await file.getSignedUrl({
+        action: 'read',
+        expires: '2099-12-31',
+      });
+      return this.songService.createSong(albumId, dto, publicUrl, path);
     } catch (error) {
       return { error: error.message };
     }
@@ -146,14 +159,6 @@ export class SongController {
     }
   }
 
-  @Get('/upload/:fileName')
-  @ApiOperation({ summary: 'Get Song Data' })
-  @ApiResponse({ status: 200, description: 'Return the song file' })
-  @ApiResponse({ status: 404, description: 'Song not found' })
-  async downloadFile(@Param('fileName') fileName: string, @Res() res: Response): Promise<void> {
-    res.sendFile(path.join(__dirname, '../../upload/', fileName));
-  }
-
   @Patch('/:albumId/:songId')
   @UseGuards(JwtGuard, RolesGuard)
   @Roles(Role.ADMIN)
@@ -186,10 +191,22 @@ export class SongController {
         .build({ errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY })
       ,
     )
-      songFile: Express.Multer.File,
+    songFile: Express.Multer.File,
   ) {
     try {
-      return this.songService.updateSong(albumId, songId, dto, songFile.path);
+      const storage = this.firebaseSerivce.getStorageInstance();
+      const path = `song/${albumId}/${songFile.originalname}`;
+      await storage.bucket().upload(songFile.path, {
+        destination: path,
+      });
+
+      const file = storage.bucket().file(path);
+      const [publicUrl] = await file.getSignedUrl({
+        action: 'read',
+        expires: '2099-12-31', 
+      });
+
+      return this.songService.updateSong(albumId, songId, dto, publicUrl, path);
     } catch (error) {
       return { error: error.message };
     }
