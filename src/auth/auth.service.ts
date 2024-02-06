@@ -6,6 +6,8 @@ import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import Role from '../utils/role.enum';
+import { FirebaseService } from 'src/firebase/firebase.service';
+import { UserDto } from 'src/user/dto';
 
 @Injectable()
 export class AuthService {
@@ -13,13 +15,14 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly config: ConfigService,
     private readonly jwt: JwtService,
+    private readonly firebaseService: FirebaseService
   ) {
   }
 
-  async createUser(dto: AuthDto) {
+  async createUser(dto: AuthDto, pictureFile: Express.Multer.File) {
     const hash = await argon.hash(dto.password);
     try {
-      const user = await this.prisma.user.create({
+      const registeredUser = await this.prisma.user.create({
         data: {
           email: dto.email,
           hash,
@@ -27,6 +30,26 @@ export class AuthService {
           lastName: dto.lastName,
         },
       });
+      const storage = this.firebaseService.getStorageInstance();
+      const picturePath = `user/${registeredUser.id}/${pictureFile.originalname}`;
+      await storage.bucket().upload(pictureFile.path, {
+        destination: picturePath,
+      });
+
+      const file = storage.bucket().file(picturePath);
+      const [pictureUrl] = await file.getSignedUrl({
+        action: 'read',
+        expires: '2099-12-31',
+      });
+      const user = await this.prisma.user.update({
+        where: {
+          id: registeredUser.id
+        },
+        data: {
+          picturePath,
+          pictureUrl
+        }
+      })
       return {
         userId: user.id,
         token: await this.signToken(user.id, user.email, user.role as Role),
@@ -56,7 +79,7 @@ export class AuthService {
       payload,
       {
         secret: secret,
-        expiresIn:'365d'
+        expiresIn: '365d'
       },
     );
     return token;
@@ -88,18 +111,23 @@ export class AuthService {
     };
   }
 
-  async updateUser(userId: string, dto: AuthDto) {
+  async updateUser(userId: string, dto: UserDto, pictureFile: Express.Multer.File) {
     const user = await this.prisma.user.findUnique({
       where: {
-        email: dto.email,
-        id: userId,
+        id: userId
       },
     });
-    if (userId !== user.id) {
-      throw new ForbiddenException(
-        'Credentials incorrect',
-      );
-    }
+    const storage = this.firebaseService.getStorageInstance();
+    const picturePath = `user/${user.id}/${pictureFile.originalname}`;
+    await storage.bucket().upload(pictureFile.path, {
+      destination: picturePath,
+    });
+
+    const file = storage.bucket().file(picturePath);
+    const [pictureUrl] = await file.getSignedUrl({
+      action: 'read',
+      expires: '2099-12-31',
+    });
     const hash = await argon.hash(dto.password);
     const updatedUser = await this.prisma.user.update({
       where: {
@@ -107,18 +135,31 @@ export class AuthService {
       },
       data: {
         id: user.id,
-        email: dto.email,
         firstName: dto.firstName || user.firstName,
         lastName: dto.lastName || user.lastName,
-        hash
+        hash,
+        picturePath,
+        pictureUrl
       },
     });
     delete updatedUser.hash;
     delete updatedUser.id;
+    delete updatedUser.role;
+    delete updatedUser.picturePath;
+    delete updatedUser.pictureUrl;
     return updatedUser;
   }
 
   async deleteUser(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: userId
+      }
+    })
+    if (user.picturePath) {
+      const file = this.firebaseService.getStorageInstance().bucket().file(user.picturePath)
+      await file.delete()
+    }
     const deletedUser = await this.prisma.user.delete({
       where: {
         id: userId,

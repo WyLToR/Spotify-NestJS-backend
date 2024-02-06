@@ -1,8 +1,14 @@
-import { Controller, Post, Body} from '@nestjs/common';
+import { Controller, Post, Body, UseInterceptors, ParseFilePipeBuilder, UploadedFile, HttpStatus } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { AuthDto } from './dto';
-
+import { FileInterceptor } from '@nestjs/platform-express';
+import { CustomUploadFileTypeValidator } from 'src/song/validator';
+const MAX_PICTURE_SIZE = 5 * 1024 * 1024;
+const VALID_IMAGE_MIME_TYPES = [
+  'image/jpeg', 'image/png', 'image/gif', 'image/bmp',
+  'image/webp'
+];
 
 @ApiTags('authentication')
 @Controller('auth')
@@ -14,12 +20,25 @@ export class AuthController {
   @ApiOperation({ summary: 'Register User' })
   @ApiResponse({ status: 201, description: 'User successfully registered' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
+  @UseInterceptors(FileInterceptor('pictureFile'))
   @ApiBody({ type: AuthDto })
   async registerUser(
     @Body() dto: AuthDto,
+    @UploadedFile(
+      new ParseFilePipeBuilder()
+        .addValidator(
+          new CustomUploadFileTypeValidator({
+            fileType: VALID_IMAGE_MIME_TYPES,
+          }),
+        )
+        .addMaxSizeValidator({ maxSize: MAX_PICTURE_SIZE })
+        .build({ errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY })
+      ,
+    )
+    pictureFile: Express.Multer.File,
   ) {
     try {
-      const user = await this.authService.createUser(dto);
+      const user = await this.authService.createUser(dto, pictureFile);
       return { message: 'User successfully registered', user };
     } catch (error) {
       return { error: error.message };
