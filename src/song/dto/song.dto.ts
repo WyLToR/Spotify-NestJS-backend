@@ -10,4 +10,7 @@ export class SongDto {
     @IsString()
     @IsNotEmpty()
     title: string;
+
+    @ApiProperty({ type: 'string', format: 'binary', required: true })
+    songFile?: Express.Multer.File;
 }

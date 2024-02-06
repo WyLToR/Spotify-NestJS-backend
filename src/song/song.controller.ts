@@ -50,19 +50,10 @@ export class SongController {
   @ApiOperation({ summary: 'Create New Song' })
   @ApiResponse({ status: 201, description: 'The song has been successfully created' })
   @ApiResponse({ status: 400, description: 'Request body format is incorrect' })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        title: { type: 'string' },
-        songFile: { type: 'string', format: 'binary' },
-      },
-      required: ['title', 'songFile'],
-    },
-  })
+  @ApiBody({type: SongDto})
   async createSong(
     @Param('albumId') albumId: string,
-    @Body() dto: any,
+    @Body() dto: SongDto,
     @UploadedFile(
       new ParseFilePipeBuilder()
         .addValidator(
@@ -154,16 +145,7 @@ export class SongController {
   @ApiOperation({ summary: 'Update Song' })
   @ApiResponse({ status: 200, description: 'Return the updated song data' })
   @ApiResponse({ status: 400, description: 'Invalid request or song not found' })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        title: { type: 'string' },
-        songFile: { type: 'string', format: 'binary' },
-      },
-      required: ['title', 'songFile'],
-    },
-  })
+  @ApiBody({type: SongDto})
   async updateSong(
     @Param('albumId') albumId: string,
     @Param('songId') songId: string,
