@@ -1,7 +1,6 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { PrismaService } from '../db/prisma.service';
 import { SongDto } from './dto';
-import { NotFoundDataException } from '../utils/not-found.exception';
 import { FirebaseService } from 'src/firebase/firebase.service';
 
 @Injectable()
