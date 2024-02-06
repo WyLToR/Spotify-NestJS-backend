@@ -1,4 +1,5 @@
 import {
+  Bind,
   Body,
   Controller,
   Delete,
@@ -7,7 +8,7 @@ import {
   Param,
   ParseFilePipeBuilder,
   Patch,
-  Post, Res,
+  Post,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -22,13 +23,11 @@ import { Roles } from '../auth/decorators';
 import Role from '../utils/role.enum';
 import { CustomUploadFileTypeValidator } from './validator';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { Response } from 'express';
-import * as path from 'path';
 import { FirebaseService } from 'src/firebase/firebase.service';
 
 
 const MAX_SONG_SIZE = 2 * 1024 * 1024;
-const VALID_UPLOAD_MIME_TYPES = [
+const VALID_SONG_MIME_TYPES = [
   'audio/mpeg', 'audio/aac', 'audio/midi', 'audio/x-midi',
   'audio/ogg', 'audio/opus', 'audio/wav', 'audio/webm',
 ];
@@ -40,7 +39,6 @@ export class SongController {
   constructor(
     private readonly songService: SongService,
     private readonly playListService: PlaylistService,
-    private readonly firebaseSerivce: FirebaseService,
   ) {
   }
 
@@ -69,32 +67,22 @@ export class SongController {
       new ParseFilePipeBuilder()
         .addValidator(
           new CustomUploadFileTypeValidator({
-            fileType: VALID_UPLOAD_MIME_TYPES,
+            fileType: VALID_SONG_MIME_TYPES,
           }),
         )
         .addMaxSizeValidator({ maxSize: MAX_SONG_SIZE })
         .build({ errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY })
-      ,
     )
     songFile: Express.Multer.File,
   ) {
     try {
-      const storage = this.firebaseSerivce.getStorageInstance();
-      const path = `song/${albumId}/${songFile.originalname}`;
-      await storage.bucket().upload(songFile.path, {
-        destination: path,
-      });
-
-      const file = storage.bucket().file(path);
-      const [publicUrl] = await file.getSignedUrl({
-        action: 'read',
-        expires: '2099-12-31',
-      });
-      return this.songService.createSong(albumId, dto, publicUrl, path);
+      return this.songService.createSong(albumId, dto, songFile);
     } catch (error) {
       return { error: error.message };
     }
   }
+
+
 
   @Get('/')
   @Roles(Role.USER, Role.ADMIN)
@@ -184,7 +172,7 @@ export class SongController {
       new ParseFilePipeBuilder()
         .addValidator(
           new CustomUploadFileTypeValidator({
-            fileType: VALID_UPLOAD_MIME_TYPES,
+            fileType: VALID_SONG_MIME_TYPES,
           }),
         )
         .addMaxSizeValidator({ maxSize: MAX_SONG_SIZE })
@@ -194,19 +182,7 @@ export class SongController {
     songFile: Express.Multer.File,
   ) {
     try {
-      const storage = this.firebaseSerivce.getStorageInstance();
-      const path = `song/${albumId}/${songFile.originalname}`;
-      await storage.bucket().upload(songFile.path, {
-        destination: path,
-      });
-
-      const file = storage.bucket().file(path);
-      const [publicUrl] = await file.getSignedUrl({
-        action: 'read',
-        expires: '2099-12-31', 
-      });
-
-      return this.songService.updateSong(albumId, songId, dto, publicUrl, path);
+      return this.songService.updateSong(albumId, songId, dto, songFile);
     } catch (error) {
       return { error: error.message };
     }
