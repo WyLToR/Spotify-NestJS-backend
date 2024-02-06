@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Param, Patch, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, Patch, Delete, UseGuards, UseInterceptors, UploadedFile, ParseFilePipeBuilder, HttpStatus } from '@nestjs/common';
 import { AlbumService } from './album.service';
 import { AlbumDto } from './dto';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -6,26 +6,59 @@ import { JwtGuard } from '../auth/guard';
 import { RolesGuard } from '../auth/roles';
 import { Roles } from '../auth/decorators';
 import Role from '../utils/role.enum';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { CustomUploadFileTypeValidator } from 'src/song/validator';
+import { FirebaseService } from 'src/firebase/firebase.service';
+
+const MAX_PICTURE_SIZE = 5 * 1024 * 1024;
+const VALID_IMAGE_MIME_TYPES = [
+    'image/jpeg', 'image/png', 'image/gif', 'image/bmp',
+    'image/webp'
+];
 
 @Controller('album')
 @ApiTags('album')
 export class AlbumController {
-    constructor(private readonly albumService: AlbumService) { }
+    constructor(
+        private readonly albumService: AlbumService,
+    ) { }
 
     @Post('/:artistId')
     @UseGuards(JwtGuard, RolesGuard)
-    @Roles( Role.ADMIN)
+    @Roles(Role.ADMIN)
     @ApiBearerAuth()
+    @UseInterceptors(FileInterceptor('pictureFile'))
     @ApiOperation({ summary: 'Create New Album' })
     @ApiResponse({ status: 201, description: 'The album has been successfully created' })
     @ApiResponse({ status: 400, description: 'Request body format is incorrect' })
-    @ApiBody({ type: AlbumDto })
+    @ApiBody({
+        schema: {
+            type: 'object',
+            properties: {
+                albumName: { type: 'string' },
+                pictureFile: { type: 'string', format: 'binary' },
+            },
+            required: ['title'],
+        },
+    })
     async createAlbum(
         @Param('artistId') artistId: string,
-        @Body() dto: AlbumDto
+        @Body() dto: AlbumDto,
+        @UploadedFile(
+            new ParseFilePipeBuilder()
+                .addValidator(
+                    new CustomUploadFileTypeValidator({
+                        fileType: VALID_IMAGE_MIME_TYPES,
+                    }),
+                )
+                .addMaxSizeValidator({ maxSize: MAX_PICTURE_SIZE })
+                .build({ errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY })
+            ,
+        )
+        pictureFile: Express.Multer.File,
     ) {
         try {
-            return this.albumService.createAlbum(artistId, dto);
+            return this.albumService.createAlbum(artistId, dto, pictureFile);
         } catch (error) {
             return { error: error.message }
         }
@@ -61,19 +94,41 @@ export class AlbumController {
 
     @Patch('/:artistId/:albumId')
     @UseGuards(JwtGuard, RolesGuard)
-    @Roles( Role.ADMIN)
+    @Roles(Role.ADMIN)
     @ApiBearerAuth()
+    @UseInterceptors(FileInterceptor('pictureFile'))
     @ApiOperation({ summary: 'Update Album' })
     @ApiResponse({ status: 200, description: 'Return the updated album data' })
     @ApiResponse({ status: 400, description: 'Invalid request or album not found' })
-    @ApiBody({ type: AlbumDto })
+    @ApiBody({
+        schema: {
+            type: 'object',
+            properties: {
+                albumName: { type: 'string' },
+                pictureFile: { type: 'string', format: 'binary' },
+            },
+            required: ['title'],
+        },
+    })
     async updateAlbum(
         @Param('artistId') artistId: string,
         @Param('albumId') albumId: string,
-        @Body() dto: AlbumDto
+        @Body() dto: AlbumDto,
+        @UploadedFile(
+            new ParseFilePipeBuilder()
+                .addValidator(
+                    new CustomUploadFileTypeValidator({
+                        fileType: VALID_IMAGE_MIME_TYPES,
+                    }),
+                )
+                .addMaxSizeValidator({ maxSize: MAX_PICTURE_SIZE })
+                .build({ errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY })
+            ,
+        )
+        pictureFile: Express.Multer.File,
     ) {
         try {
-            return this.albumService.updateAlbum(artistId, albumId, dto);
+            return this.albumService.updateAlbum(artistId, albumId, dto, pictureFile);
         } catch (error) {
             return { error: error.message }
         }
@@ -81,7 +136,7 @@ export class AlbumController {
 
     @Delete('/:albumId')
     @UseGuards(JwtGuard, RolesGuard)
-    @Roles( Role.ADMIN)
+    @Roles(Role.ADMIN)
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Delete Album by ID' })
     @ApiResponse({ status: 200, description: 'The album has been successfully deleted' })
