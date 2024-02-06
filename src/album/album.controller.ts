@@ -8,7 +8,6 @@ import { Roles } from '../auth/decorators';
 import Role from '../utils/role.enum';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CustomUploadFileTypeValidator } from 'src/song/validator';
-import { FirebaseService } from 'src/firebase/firebase.service';
 
 const MAX_PICTURE_SIZE = 5 * 1024 * 1024;
 const VALID_IMAGE_MIME_TYPES = [
@@ -31,16 +30,7 @@ export class AlbumController {
     @ApiOperation({ summary: 'Create New Album' })
     @ApiResponse({ status: 201, description: 'The album has been successfully created' })
     @ApiResponse({ status: 400, description: 'Request body format is incorrect' })
-    @ApiBody({
-        schema: {
-            type: 'object',
-            properties: {
-                albumName: { type: 'string' },
-                pictureFile: { type: 'string', format: 'binary' },
-            },
-            required: ['title'],
-        },
-    })
+    @ApiBody({type: AlbumDto})
     async createAlbum(
         @Param('artistId') artistId: string,
         @Body() dto: AlbumDto,
@@ -100,16 +90,7 @@ export class AlbumController {
     @ApiOperation({ summary: 'Update Album' })
     @ApiResponse({ status: 200, description: 'Return the updated album data' })
     @ApiResponse({ status: 400, description: 'Invalid request or album not found' })
-    @ApiBody({
-        schema: {
-            type: 'object',
-            properties: {
-                albumName: { type: 'string' },
-                pictureFile: { type: 'string', format: 'binary' },
-            },
-            required: ['title'],
-        },
-    })
+    @ApiBody({type: AlbumDto})
     async updateAlbum(
         @Param('artistId') artistId: string,
         @Param('albumId') albumId: string,
