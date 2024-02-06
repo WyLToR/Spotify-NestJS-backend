@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsString, IsNotEmpty } from "class-validator";
+import { IsString, IsNotEmpty, IsOptional } from "class-validator";
 
 
 export class ArtistDto {
@@ -17,4 +17,8 @@ export class ArtistDto {
     @IsString()
     @IsNotEmpty()
     biography: string;
+
+    @ApiProperty({ type: 'string', format: 'binary', required: false })
+    @IsOptional()
+    pictureFile?: Express.Multer.File;
 }
