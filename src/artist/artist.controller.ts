@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Param, Patch, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, Patch, Delete, UseGuards, UploadedFile, ParseFilePipeBuilder, HttpStatus, UseInterceptors } from '@nestjs/common';
 import { ArtistService } from './artist.service';
 import { ArtistDto } from './dto';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -6,6 +6,14 @@ import { JwtGuard } from '../auth/guard';
 import { RolesGuard } from '../auth/roles';
 import { Roles } from '../auth/decorators';
 import Role from '../utils/role.enum';
+import { CustomUploadFileTypeValidator } from 'src/song/validator';
+import { FileInterceptor } from '@nestjs/platform-express';
+
+const MAX_PICTURE_SIZE = 5 * 1024 * 1024;
+const VALID_IMAGE_MIME_TYPES = [
+    'image/jpeg', 'image/png', 'image/gif', 'image/bmp',
+    'image/webp'
+];
 
 @Controller('artist')
 @ApiTags('artist')
@@ -15,15 +23,38 @@ export class ArtistController {
     @Post('/')
     @UseGuards(JwtGuard, RolesGuard)
     @ApiBearerAuth()
+    @UseInterceptors(FileInterceptor('pictureFile'))
     @ApiOperation({ summary: 'Create New Artist' })
     @ApiResponse({ status: 201, description: 'The artist has been successfully created' })
     @ApiResponse({ status: 400, description: 'Request body format is incorrect' })
-    @ApiBody({ type: ArtistDto })
+    @ApiBody({
+        schema: {
+            type: 'object',
+            properties: {
+                name: { type: 'string' },
+                genre: { type: 'string' },
+                biography: { type: 'string' },
+                pictureFile: { type: 'string', format: 'binary' },
+            },
+            required: ['name', 'genre', 'biography'],
+        },
+    })
     createArtist(
-        @Body() dto: ArtistDto
+        @Body() dto: ArtistDto,
+        @UploadedFile(
+            new ParseFilePipeBuilder()
+                .addValidator(
+                    new CustomUploadFileTypeValidator({
+                        fileType: VALID_IMAGE_MIME_TYPES,
+                    }),
+                )
+                .addMaxSizeValidator({ maxSize: MAX_PICTURE_SIZE })
+                .build({ errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY })
+        )
+        pictureFile: Express.Multer.File,
     ) {
         try {
-            return this.artistService.createArtist(dto);
+            return this.artistService.createArtist(dto, pictureFile);
         } catch (error) {
             return { error: error.message }
         }
@@ -59,18 +90,40 @@ export class ArtistController {
 
     @Patch('/:artistId')
     @UseGuards(JwtGuard, RolesGuard)
-    @Roles( Role.ADMIN)
+    @Roles(Role.ADMIN)
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Update Artist' })
     @ApiResponse({ status: 200, description: 'Return the updated artist data' })
     @ApiResponse({ status: 400, description: 'Invalid request or artist not found' })
-    @ApiBody({ type: ArtistDto })
+    @ApiBody({
+        schema: {
+            type: 'object',
+            properties: {
+                name: { type: 'string' },
+                genre: { type: 'string' },
+                biography: { type: 'string' },
+                pictureFile: { type: 'string', format: 'binary' },
+            },
+            required: ['name', 'genre', 'biography'],
+        },
+    })
     async updateArtist(
         @Param('artistId') artistId: string,
-        @Body() dto: ArtistDto
+        @Body() dto: ArtistDto,
+        @UploadedFile(
+            new ParseFilePipeBuilder()
+                .addValidator(
+                    new CustomUploadFileTypeValidator({
+                        fileType: VALID_IMAGE_MIME_TYPES,
+                    }),
+                )
+                .addMaxSizeValidator({ maxSize: MAX_PICTURE_SIZE })
+                .build({ errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY })
+        )
+        pictureFile: Express.Multer.File,
     ) {
         try {
-            return this.artistService.updateArtist(artistId, dto);
+            return this.artistService.updateArtist(artistId, dto, pictureFile);
         } catch (error) {
             return { error: error.message }
         }
@@ -78,7 +131,7 @@ export class ArtistController {
 
     @Delete('/:artistId')
     @UseGuards(JwtGuard, RolesGuard)
-    @Roles( Role.ADMIN)
+    @Roles(Role.ADMIN)
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Delete Artist by ID' })
     @ApiResponse({ status: 200, description: 'The artist has been successfully deleted' })
