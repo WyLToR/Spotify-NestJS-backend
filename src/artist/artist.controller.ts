@@ -27,18 +27,7 @@ export class ArtistController {
     @ApiOperation({ summary: 'Create New Artist' })
     @ApiResponse({ status: 201, description: 'The artist has been successfully created' })
     @ApiResponse({ status: 400, description: 'Request body format is incorrect' })
-    @ApiBody({
-        schema: {
-            type: 'object',
-            properties: {
-                name: { type: 'string' },
-                genre: { type: 'string' },
-                biography: { type: 'string' },
-                pictureFile: { type: 'string', format: 'binary' },
-            },
-            required: ['name', 'genre', 'biography'],
-        },
-    })
+    @ApiBody({ type: ArtistDto })
     createArtist(
         @Body() dto: ArtistDto,
         @UploadedFile(
@@ -95,18 +84,7 @@ export class ArtistController {
     @ApiOperation({ summary: 'Update Artist' })
     @ApiResponse({ status: 200, description: 'Return the updated artist data' })
     @ApiResponse({ status: 400, description: 'Invalid request or artist not found' })
-    @ApiBody({
-        schema: {
-            type: 'object',
-            properties: {
-                name: { type: 'string' },
-                genre: { type: 'string' },
-                biography: { type: 'string' },
-                pictureFile: { type: 'string', format: 'binary' },
-            },
-            required: ['name', 'genre', 'biography'],
-        },
-    })
+    @ApiBody({type: ArtistDto})
     async updateArtist(
         @Param('artistId') artistId: string,
         @Body() dto: ArtistDto,
