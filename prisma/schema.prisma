@@ -11,28 +11,32 @@ datasource db {
 }
 
 model Artist {
-  id        String  @id @default(cuid())
-  name      String  @unique
-  genre     String
-  biography String
-  albums    Album[]
+  id          String  @id @default(cuid())
+  name        String  @unique
+  genre       String
+  biography   String
+  pictureUrl  String?
+  picturePath String?
+  albums      Album[]
 }
 
 model Album {
-  id        String @id @default(cuid())
-  albumName String
-  artistId  String
-  artist    Artist @relation(fields: [artistId], references: [id], onDelete: Cascade)
-  songs     Song[]
+  id          String  @id @default(cuid())
+  albumName   String
+  artistId    String
+  pictureUrl  String?
+  picturePath String?
+  artist      Artist  @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  songs       Song[]
 }
 
 model Song {
-  id       String @id @default(cuid())
-  albumId  String
-  album    Album  @relation(fields: [albumId], references: [id], onDelete: Cascade)
-  title    String
-  songPath String
-  url      String
+  id          String  @id @default(cuid())
+  albumId     String
+  album       Album   @relation(fields: [albumId], references: [id], onDelete: Cascade)
+  title       String
+  songPath    String
+  url         String
 
   playlistSongs PlaylistSong[]
 }
@@ -48,6 +52,9 @@ model User {
 
   firstName String?
   lastName  String?
+
+  pictureUrl  String?
+  picturePath String?
 
   playlists PlayList[]
 }
