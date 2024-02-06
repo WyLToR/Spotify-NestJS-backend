@@ -21,4 +21,8 @@ export class AuthDto {
     @IsOptional()
     @IsString()
     lastName?: string;
+
+    @ApiProperty({ type: 'string', format: 'binary', required: false })
+    @IsOptional()
+    pictureFile?: Express.Multer.File;
 }
