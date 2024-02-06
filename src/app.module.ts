@@ -23,6 +23,7 @@ import { MulterModule } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { FirebaseService } from './firebase/firebase.service';
 import { FirebaseModule } from './firebase/firebase.module';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
@@ -33,7 +34,7 @@ import { FirebaseModule } from './firebase/firebase.module';
       storage: diskStorage({}),
     }),
     inject: [ConfigService],
-  }), PrismaModule, AlbumModule, SongModule, ArtistModule, AuthModule, PlaylistModule, FirebaseModule],
+  }), PrismaModule, AlbumModule, SongModule, ArtistModule, AuthModule, PlaylistModule, FirebaseModule, UserModule],
   providers: [ArtistService, AlbumService, SongService, AuthService, JwtService, PlaylistService, FirebaseService],
   controllers: [ArtistController, AlbumController, SongController, UserController, AuthController, PlaylistController, AdminController],
 })
