@@ -52,7 +52,7 @@ export class AuthService {
       })
       return {
         userId: user.id,
-        token: await this.signToken(user.id, user.email, user.role as Role),
+        token: await this.signToken(user.id, user.email, user.pictureUrl, user.role as Role),
       };
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
@@ -66,12 +66,14 @@ export class AuthService {
   async signToken(
     userId: string,
     email: string,
-    role: Role
+    userPicture: string,
+    role: Role,
   ): Promise<string> {
     const payload = {
       sub: userId,
       email,
       role,
+      userPicture
     };
     const secret = this.config.get('JWT_SECRET');
 
@@ -101,13 +103,14 @@ export class AuthService {
       user.hash,
       dto.password,
     );
-    if (!pwMatches)
+    if (!pwMatches) {
       throw new ForbiddenException(
         'Credentials incorrect',
       );
+    }
     return {
       userId: user.id,
-      token: await this.signToken(user.id, user.email, user.role as Role),
+      token: await this.signToken(user.id, user.email, user.pictureUrl, user.role as Role),
     };
   }
 
