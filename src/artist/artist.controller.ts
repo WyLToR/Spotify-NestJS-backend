@@ -81,6 +81,7 @@ export class ArtistController {
     @UseGuards(JwtGuard, RolesGuard)
     @Roles(Role.ADMIN)
     @ApiBearerAuth()
+    @UseInterceptors(FileInterceptor('pictureFile'))
     @ApiOperation({ summary: 'Update Artist' })
     @ApiResponse({ status: 200, description: 'Return the updated artist data' })
     @ApiResponse({ status: 400, description: 'Invalid request or artist not found' })
