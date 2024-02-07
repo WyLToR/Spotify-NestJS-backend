@@ -64,7 +64,7 @@ export class AlbumService {
             }
         })
         if (oldAlbumData.picturePath) {
-            const oldFile = this.firebaseService.getStorageInstance().bucket().file(oldAlbumData.pictureUrl)
+            const oldFile = this.firebaseService.getStorageInstance().bucket().file(oldAlbumData.picturePath)
             await oldFile.delete()
         }
         const storage = this.firebaseService.getStorageInstance();
