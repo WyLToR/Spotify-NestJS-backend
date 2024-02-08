@@ -10,7 +10,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors();
   if (!admin.apps.length) {
-    const serviceAccount = require('../socloud-c68fb-firebase-adminsdk-2ir21-5d2de1354d.json');
+    const serviceAccount = require('../socloud-c68fb-firebase-adminsdk-2ir21-cf5ebbc35e.json');
     admin.initializeApp({
       credential: admin.credential.cert(serviceAccount),
       storageBucket: process.env.FIREBASE,
