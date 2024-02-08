@@ -22,8 +22,8 @@ import { AdminController } from './admin/admin.controller';
 import { MulterModule } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { FirebaseService } from './firebase/firebase.service';
-import { FirebaseModule } from './firebase/firebase.module';
 import { UserModule } from './user/user.module';
+import { FirebaseModule } from './firebase/firebase.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
