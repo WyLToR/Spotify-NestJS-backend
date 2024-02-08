@@ -5,10 +5,11 @@ import { PlaylistService } from '../playlist/playlist.service';
 import { JwtStrategy } from '../auth/strategy';
 import { PrismaService } from '../db/prisma.service';
 import { FirebaseModule } from 'src/firebase/firebase.module';
+import { FirebaseService } from 'src/firebase/firebase.service';
 
 @Module({
     imports:[FirebaseModule],
     controllers: [SongController],
-    providers: [SongService, JwtStrategy, PlaylistService, PrismaService]
+    providers: [SongService, JwtStrategy, PlaylistService, PrismaService, FirebaseService]
 })
 export class SongModule {}
