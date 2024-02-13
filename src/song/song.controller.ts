@@ -1,5 +1,4 @@
 import {
-  Bind,
   Body,
   Controller,
   Delete,
@@ -23,10 +22,9 @@ import { Roles } from '../auth/decorators';
 import Role from '../utils/role.enum';
 import { CustomUploadFileTypeValidator } from './validator';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { FirebaseService } from 'src/firebase/firebase.service';
 
 
-const MAX_SONG_SIZE = 2 * 1024 * 1024;
+const MAX_SONG_SIZE = 11 * 1024 * 1024;
 const VALID_SONG_MIME_TYPES = [
   'audio/mpeg', 'audio/aac', 'audio/midi', 'audio/x-midi',
   'audio/ogg', 'audio/opus', 'audio/wav', 'audio/webm',
